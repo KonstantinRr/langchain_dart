@@ -2,6 +2,24 @@ import '../../chains/sequential.dart';
 import '../base.dart';
 import 'base.dart';
 
+class SequenceException implements Exception {
+  final Runnable runnable;
+  final int index;
+
+  final Object? error;
+  final StackTrace trace;
+
+  const SequenceException({
+    required this.runnable,
+    required this.index,
+    required this.error,
+    required this.trace,
+  });
+
+  @override
+  String toString() => 'SequenceException: of runnable $runnable${runnable.runtimeType} at index $index with error $error';
+}
+
 /// {@template runnable_sequence}
 /// A [RunnableSequence] allows you to run multiple [Runnable] objects
 /// sequentially, passing the output of the previous [Runnable] to the next one.
@@ -84,6 +102,10 @@ class RunnableSequence<RunInput extends Object?, RunOutput extends Object?>
   ///
   /// - [runnables] - the [Runnable]s to create the [RunnableSequence] from.
   static RunnableSequence from(final List<Runnable> runnables) {
+    if (runnables.length < 2) {
+      throw ArgumentError('You must provide at least two runnables to create a RunnableSequence. length is ${runnables.length}');
+    }
+  
     return RunnableSequence(
       first: runnables.first,
       middle: runnables.sublist(1, runnables.length - 1),
@@ -102,11 +124,31 @@ class RunnableSequence<RunInput extends Object?, RunOutput extends Object?>
   }) async {
     Object? nextStepInput = input;
 
+    var idx = 0;
     for (final step in [first, ...middle]) {
-      nextStepInput = await step.invoke(nextStepInput, options: options);
+      try {
+        nextStepInput = await step.invoke(nextStepInput, options: options);
+        idx++;
+      } catch (e, t) {
+        throw SequenceException(
+          runnable: step,
+          index: idx,
+          error: e,
+          trace: t,
+        );
+      }
     }
 
-    return last.invoke(nextStepInput, options: options);
+    try {
+      return await last.invoke(nextStepInput, options: options);
+    } catch (e, t) {
+      throw SequenceException(
+        runnable: last,
+        index: idx,
+        error: e,
+        trace: t,
+      );
+    }
   }
 
   @override
@@ -114,13 +156,26 @@ class RunnableSequence<RunInput extends Object?, RunOutput extends Object?>
     final Stream<dynamic> inputStream, {
     final BaseLangChainOptions? options,
   }) {
-    var nextStepStream = first.streamFromInputStream(inputStream);
+    bool errorTester(final Object? obj) => obj is! SequenceException;
 
-    for (final step in middle) {
-      nextStepStream = step.streamFromInputStream(nextStepStream);
+    void Function(Object?, StackTrace) createErrorHandler(final int idx) {
+      return (final Object? e, final StackTrace t)
+        => throw SequenceException(runnable: first, index: idx, error: e, trace: t); 
     }
 
-    return last.streamFromInputStream(nextStepStream);
+    var nextStepStream = first.streamFromInputStream(inputStream)
+      .handleError(createErrorHandler(0), test: errorTester);
+
+    var idx = 0;
+    for (final step in middle) {
+      nextStepStream = step.streamFromInputStream(nextStepStream)
+        .handleError(createErrorHandler(idx), test: errorTester);
+
+      idx++;
+    }
+
+    return last.streamFromInputStream(nextStepStream)
+      .handleError(createErrorHandler(idx), test: errorTester);
   }
 
   /// Pipes the output of this [RunnableSequence] into another [Runnable].
