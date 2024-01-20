@@ -72,7 +72,7 @@ class RunnableMap<RunInput extends Object>
     final Stream<dynamic> inputStream, {
     final BaseLangChainOptions? options,
   }) {
-    return StreamGroup.merge(
+    return StreamGroup.mergeBroadcast(
       steps.entries.map((final entry) {
         return entry.value
             .streamFromInputStream(inputStream, options: options)

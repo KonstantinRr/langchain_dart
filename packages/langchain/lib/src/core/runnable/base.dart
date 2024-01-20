@@ -120,15 +120,10 @@ abstract class Runnable<RunInput extends Object?,
     final RunInput input, {
     final CallOptions? options,
   }) {
-    try {
     return streamFromInputStream(
-      Stream<RunInput>.value(input).asBroadcastStream().cast<RunInput>(),
+      Stream<RunInput>.value(input).asBroadcastStream(),
       options: options,
     );
-    } catch (e, t) {
-      print('I AM A ${runtimeType}');
-      rethrow;
-    }
   }
 
   /// Streams the output of invoking the [Runnable] on the given [inputStream].
