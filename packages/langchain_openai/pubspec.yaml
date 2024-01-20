@@ -22,6 +22,7 @@ dependencies:
   http: ^1.1.0
   #langchain: ^0.3.3
   langchain:
+    #path: ../langchain
     git:
       url: https://github.com/KonstantinRr/langchain_dart
       ref: main

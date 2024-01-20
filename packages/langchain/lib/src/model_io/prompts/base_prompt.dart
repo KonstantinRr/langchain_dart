@@ -89,11 +89,11 @@ abstract base class BasePromptTemplate
             }
           }
           final hasAllUserValues = userKeys.every(userInput.containsKey);
-          if (hasAllUserValues) {
-            return formatPrompt(userInput);
-          } else {
+          if (!hasAllUserValues) {
             return null;
           }
+
+          return formatPrompt(userInput);
         })
         .where((final res) => res != null)
         .cast();

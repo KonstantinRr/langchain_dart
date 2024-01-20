@@ -55,9 +55,10 @@ abstract class Runnable<RunInput extends Object?,
   /// Creates a [RunnableMap] from a map of [Runnable] objects.
   static Runnable<RunInput, BaseLangChainOptions, Map<String, dynamic>>
       fromMap<RunInput extends Object>(
-    final Map<String, Runnable<RunInput, BaseLangChainOptions, Object>> steps,
-  ) {
-    return RunnableMap<RunInput>(steps);
+    final Map<String, Runnable<RunInput, BaseLangChainOptions, Object>> steps, {
+    final bool combineStreams = true,
+  }) {
+    return RunnableMap<RunInput>(steps, combineStreams: combineStreams);
   }
 
   /// Creates a [RunnableFunction] from a Dart function.

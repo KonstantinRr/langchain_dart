@@ -60,10 +60,31 @@ class RunnableItemFromMap<RunOutput extends Object>
     if (value is! RunOutput) {
       throw Exception(
         'The value of the key "$key" in the input map is not of type '
-        '"$RunOutput" but instead of type "${value.runtimeType}".',
+        '"$RunOutput" but instead of type "${value.runtimeType}". '
+        'Available options are $input.',
       );
     }
     return value;
+  }
+
+  /// Streams the output of invoking the [Runnable] on the given [inputStream].
+  ///
+  /// - [inputStream] - the input stream to invoke the [Runnable] on.
+  /// - [options] - the options to use when invoking the [Runnable].
+  @override
+  Stream<RunOutput> streamFromInputStream(
+    final Stream<dynamic> inputStream, {
+    final BaseLangChainOptions? options,
+  }) {
+    // By default, it just emits the result of calling invoke
+    // Subclasses should override this method if they support streaming output
+    return inputStream
+      .cast<Map<String, dynamic>>()
+      .where((final event) => event.containsKey(key))
+      .asyncMap<RunOutput>(
+        // ignore: discarded_futures
+        (final input) => invoke(input, options: options),
+    );
   }
 }
 

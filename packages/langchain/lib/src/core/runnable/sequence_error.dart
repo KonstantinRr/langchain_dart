@@ -1,5 +1,4 @@
 import 'base.dart';
-import 'sequence_error.dart';
 
 class SequenceException implements Exception {
   final Runnable runnable;
@@ -16,5 +15,5 @@ class SequenceException implements Exception {
   });
 
   @override
-  String toString() => 'SequenceException: of runnable $runnable${runnable.runtimeType} at index $index with error $error';
+  String toString() => 'SequenceException: of runnable $runnable(${runnable.runtimeType}) at index: $index with error: $error';
 }

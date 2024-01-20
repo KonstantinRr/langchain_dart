@@ -12,6 +12,7 @@ abstract class BaseLLMOutputParser<LLMOutput extends Object,
         CallOptions extends BaseLangChainOptions, ParserOutput extends Object?>
     extends Runnable<LanguageModelResult<LLMOutput>, CallOptions,
         ParserOutput> {
+
   /// {@macro base_llm_output_parser}
   const BaseLLMOutputParser();
 

@@ -45,7 +45,11 @@ import 'sequence_error.dart';
 class RunnableMap<RunInput extends Object>
     extends Runnable<RunInput, BaseLangChainOptions, Map<String, dynamic>> {
   /// {@macro runnable_map}
-  const RunnableMap(this.steps);
+  const RunnableMap(this.steps, {this.combineStreams = true});
+
+  /// Whether to combine the streams of the [Runnable] objects in the map.
+  /// and send the output as one block.
+  final bool combineStreams;
 
   /// The map of [Runnable] objects to run in parallel.
   final Map<String, Runnable<RunInput, BaseLangChainOptions, Object>> steps;
@@ -62,7 +66,12 @@ class RunnableMap<RunInput extends Object>
     final output = <String, dynamic>{};
 
     await Future.forEach(steps.entries, (final entry) async {
-      output[entry.key] = await entry.value.invoke(input, options: options);
+      try {
+        final result = await entry.value.invoke(input, options: options);
+        output[entry.key] = result;
+      } catch (e, t) {
+        throw SequenceException(runnable: entry.value, index: entry.key, error: e, trace: t);
+      }
     });
 
     return output;
@@ -80,13 +89,31 @@ class RunnableMap<RunInput extends Object>
         => throw SequenceException(runnable: runnable, index: key, error: e, trace: t); 
     }
 
-    return StreamGroup.mergeBroadcast(
-      steps.entries.map((final entry) {
-        return entry.value
-            .streamFromInputStream(inputStream, options: options)
-            .handleError(createErrorHandler(entry.value, entry.key), test: errorTester)
-            .map((final output) => {entry.key: output});
-      }),
-    );
+    if (combineStreams) {
+      // ignore: discarded_futures
+      return Stream.fromFuture(
+        StreamGroup.mergeBroadcast<MapEntry<String, dynamic>>(
+          steps.entries.map((final entry) => entry.value
+                .streamFromInputStream(inputStream, options: options)
+                .handleError(createErrorHandler(entry.value, entry.key), test: errorTester)
+                .map((final output) => MapEntry<String, dynamic>(entry.key, output)),
+          ),
+        )
+          // ignore: discarded_futures
+          .fold(<String, dynamic>{}, (final previous, final element) {
+            previous[element.key] = element.value;
+            return previous;
+          }),
+      )
+        .asBroadcastStream();
+    } else {
+      return StreamGroup.mergeBroadcast(
+        steps.entries.map((final entry) => entry.value
+              .streamFromInputStream(inputStream, options: options)
+              .handleError(createErrorHandler(entry.value, entry.key), test: errorTester)
+              .map((final output) => {entry.key: output}),
+        ),
+      );
+    }
   }
 }
