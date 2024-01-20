@@ -5,6 +5,7 @@ repository: https://github.com/davidmigloz/langchain_dart/tree/main/packages/lan
 issue_tracker: https://github.com/davidmigloz/langchain_dart/issues
 homepage: https://github.com/davidmigloz/langchain_dart
 documentation: https://langchaindart.com
+publish_to: none
 
 topics:
   - ai
@@ -19,7 +20,12 @@ environment:
 dependencies:
   chromadb: ^0.1.1
   http: ^1.1.0
-  langchain: ^0.3.3
+  #langchain: ^0.3.3
+  langchain:
+    git:
+      url: https://github.com/KonstantinRr/langchain_dart
+      ref: main
+      path: packages/langchain
   meta: ^1.9.1
   uuid: ^4.0.0
 
