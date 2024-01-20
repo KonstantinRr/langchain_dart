@@ -137,9 +137,9 @@ abstract class Runnable<RunInput extends Object?,
   }) {
     // By default, it just emits the result of calling invoke
     // Subclasses should override this method if they support streaming output
-    return inputStream.asyncMap(
+    return inputStream.asyncMap<RunOutput>(
       // ignore: discarded_futures
-      (final input) => invoke(input, options: options),
+      (final RunInput input) => invoke(input, options: options),
     );
   }
 
