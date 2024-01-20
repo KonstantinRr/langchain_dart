@@ -120,10 +120,15 @@ abstract class Runnable<RunInput extends Object?,
     final RunInput input, {
     final CallOptions? options,
   }) {
+    try {
     return streamFromInputStream(
       Stream<RunInput>.value(input).asBroadcastStream().cast<RunInput>(),
       options: options,
     );
+    } catch (e, t) {
+      print('I AM A ${runtimeType}');
+      rethrow;
+    }
   }
 
   /// Streams the output of invoking the [Runnable] on the given [inputStream].
@@ -132,7 +137,7 @@ abstract class Runnable<RunInput extends Object?,
   /// - [options] - the options to use when invoking the [Runnable].
   @protected
   Stream<RunOutput> streamFromInputStream(
-    final Stream inputStream, {
+    final Stream<RunInput> inputStream, {
     final CallOptions? options,
   }) {
     // By default, it just emits the result of calling invoke
