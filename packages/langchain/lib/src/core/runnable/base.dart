@@ -121,7 +121,7 @@ abstract class Runnable<RunInput extends Object?,
     final CallOptions? options,
   }) {
     return streamFromInputStream(
-      Stream.value(input).asBroadcastStream(),
+      Stream<RunInput>.value(input).asBroadcastStream(),
       options: options,
     );
   }
