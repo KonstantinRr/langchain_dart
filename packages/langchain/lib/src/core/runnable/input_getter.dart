@@ -56,7 +56,14 @@ class RunnableItemFromMap<RunOutput extends Object>
     final Map<String, dynamic> input, {
     final BaseLangChainOptions? options,
   }) async {
-    return input[key];
+    final value = input[key];
+    if (value is! RunOutput) {
+      throw Exception(
+        'The value of the key "$key" in the input map is not of type '
+        '"$RunOutput" but instead of type "${value.runtimeType}".',
+      );
+    }
+    return value;
   }
 }
 
