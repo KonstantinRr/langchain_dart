@@ -132,14 +132,14 @@ abstract class Runnable<RunInput extends Object?,
   /// - [options] - the options to use when invoking the [Runnable].
   @protected
   Stream<RunOutput> streamFromInputStream(
-    final Stream<RunInput> inputStream, {
+    final Stream inputStream, {
     final CallOptions? options,
   }) {
     // By default, it just emits the result of calling invoke
     // Subclasses should override this method if they support streaming output
     return inputStream.asyncMap<RunOutput>(
       // ignore: discarded_futures
-      (final RunInput input) => invoke(input, options: options),
+      (final input) => invoke(input as RunInput, options: options),
     );
   }
 
