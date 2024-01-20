@@ -6,3 +6,4 @@ export 'input_map.dart';
 export 'map.dart';
 export 'passthrough.dart';
 export 'sequence.dart';
+export 'sequence_error.dart';

@@ -1,24 +1,8 @@
 import '../../chains/sequential.dart';
 import '../base.dart';
 import 'base.dart';
+import 'sequence_error.dart';
 
-class SequenceException implements Exception {
-  final Runnable runnable;
-  final int index;
-
-  final Object? error;
-  final StackTrace trace;
-
-  const SequenceException({
-    required this.runnable,
-    required this.index,
-    required this.error,
-    required this.trace,
-  });
-
-  @override
-  String toString() => 'SequenceException: of runnable $runnable${runnable.runtimeType} at index $index with error $error';
-}
 
 /// {@template runnable_sequence}
 /// A [RunnableSequence] allows you to run multiple [Runnable] objects
@@ -130,24 +114,14 @@ class RunnableSequence<RunInput extends Object?, RunOutput extends Object?>
         nextStepInput = await step.invoke(nextStepInput, options: options);
         idx++;
       } catch (e, t) {
-        throw SequenceException(
-          runnable: step,
-          index: idx,
-          error: e,
-          trace: t,
-        );
+        throw SequenceException(runnable: step, index: idx, error: e, trace: t);
       }
     }
 
     try {
       return await last.invoke(nextStepInput, options: options);
     } catch (e, t) {
-      throw SequenceException(
-        runnable: last,
-        index: idx,
-        error: e,
-        trace: t,
-      );
+      throw SequenceException(runnable: last, index: idx, error: e, trace: t);
     }
   }
 
@@ -158,24 +132,24 @@ class RunnableSequence<RunInput extends Object?, RunOutput extends Object?>
   }) {
     bool errorTester(final Object? obj) => obj is! SequenceException;
 
-    void Function(Object?, StackTrace) createErrorHandler(final int idx) {
+    void Function(Object?, StackTrace) createErrorHandler(final Runnable runnable, final int idx) {
       return (final Object? e, final StackTrace t)
-        => throw SequenceException(runnable: first, index: idx, error: e, trace: t); 
+        => throw SequenceException(runnable: runnable, index: idx, error: e, trace: t); 
     }
 
     var nextStepStream = first.streamFromInputStream(inputStream)
-      .handleError(createErrorHandler(0), test: errorTester);
+      .handleError(createErrorHandler(first, 0), test: errorTester);
 
     var idx = 0;
     for (final step in middle) {
       nextStepStream = step.streamFromInputStream(nextStepStream)
-        .handleError(createErrorHandler(idx), test: errorTester);
+        .handleError(createErrorHandler(step, idx), test: errorTester);
 
       idx++;
     }
 
     return last.streamFromInputStream(nextStepStream)
-      .handleError(createErrorHandler(idx), test: errorTester);
+      .handleError(createErrorHandler(last, idx), test: errorTester);
   }
 
   /// Pipes the output of this [RunnableSequence] into another [Runnable].

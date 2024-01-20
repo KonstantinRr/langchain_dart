@@ -2,6 +2,7 @@ import 'package:async/async.dart' show StreamGroup;
 
 import '../base.dart';
 import 'base.dart';
+import 'sequence_error.dart';
 
 /// {@template runnable_map}
 /// A [RunnableMap] allows you to run multiple [Runnable] objects in parallel
@@ -72,10 +73,18 @@ class RunnableMap<RunInput extends Object>
     final Stream<dynamic> inputStream, {
     final BaseLangChainOptions? options,
   }) {
+    bool errorTester(final Object? obj) => obj is! SequenceException;
+
+    void Function(Object?, StackTrace) createErrorHandler(final Runnable runnable, final String key) {
+      return (final Object? e, final StackTrace t)
+        => throw SequenceException(runnable: runnable, index: key, error: e, trace: t); 
+    }
+
     return StreamGroup.mergeBroadcast(
       steps.entries.map((final entry) {
         return entry.value
             .streamFromInputStream(inputStream, options: options)
+            .handleError(createErrorHandler(entry.value, entry.key), test: errorTester)
             .map((final output) => {entry.key: output});
       }),
     );
