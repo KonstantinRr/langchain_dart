@@ -213,10 +213,10 @@ class ChatOllama extends BaseChatModel<ChatOllamaOptions> {
 
   @override
   Stream<ChatResult> streamFromInputStream(
-    final Stream<PromptValue> inputStream, {
+    final Stream<dynamic> inputStream, {
     final ChatOllamaOptions? options,
   }) {
-    return inputStream.asyncExpand((final input) {
+    return inputStream.cast<PromptValue>().asyncExpand((final input) {
       return stream(input, options: options);
     });
   }

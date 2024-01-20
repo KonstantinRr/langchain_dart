@@ -63,10 +63,10 @@ class FakeEchoChatModel extends SimpleChatModel {
 
   @override
   Stream<ChatResult> streamFromInputStream(
-    final Stream<PromptValue> inputStream, {
+    final Stream<dynamic> inputStream, {
     final ChatModelOptions? options,
   }) {
-    return inputStream.asyncExpand(
+    return inputStream.cast<PromptValue>().asyncExpand(
       (final input) {
         final prompt = input.toChatMessages().first.contentAsString.split('');
         return Stream.fromIterable(prompt).map(

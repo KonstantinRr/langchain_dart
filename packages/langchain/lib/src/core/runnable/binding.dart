@@ -65,7 +65,7 @@ class RunnableBinding<RunInput extends Object?,
 
   @override
   Stream<RunOutput> streamFromInputStream(
-    final Stream<RunInput> inputStream, {
+    final Stream<dynamic> inputStream, {
     final CallOptions? options,
   }) {
     return bound.streamFromInputStream(

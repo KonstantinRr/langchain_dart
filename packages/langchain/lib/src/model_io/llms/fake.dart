@@ -62,10 +62,10 @@ class FakeEchoLLM extends SimpleLLM {
 
   @override
   Stream<LLMResult> streamFromInputStream(
-    final Stream<PromptValue> inputStream, {
+    final Stream<dynamic> inputStream, {
     final LLMOptions? options,
   }) {
-    return inputStream.asyncExpand(
+    return inputStream.cast<PromptValue>().asyncExpand(
       (final prompt) {
         final promptChars = prompt.toString().split('');
         return Stream.fromIterable(promptChars).map(

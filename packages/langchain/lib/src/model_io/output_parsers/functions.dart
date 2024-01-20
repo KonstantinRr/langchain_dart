@@ -31,10 +31,10 @@ abstract class BaseOutputFunctionsParser<
 
   @override
   Stream<O> streamFromInputStream(
-    final Stream<LanguageModelResult<ChatMessage>> inputStream, {
+    final Stream<dynamic> inputStream, {
     final CallOptions? options,
   }) {
-    return inputStream.asyncMap((final input) async {
+    return inputStream.cast<LanguageModelResult<ChatMessage>>().asyncMap((final input) async {
       final mergedResult = _lastResult?.concat(input) ?? input;
       _lastResult = mergedResult;
       final generation = mergedResult.generations.first;
@@ -156,7 +156,7 @@ class JsonOutputFunctionsParser<CallOptions extends BaseLangChainOptions>
 
   @override
   Stream<Map<String, dynamic>> streamFromInputStream(
-    final Stream<LanguageModelResult<ChatMessage>> inputStream, {
+    final Stream<dynamic> inputStream, {
     final CallOptions? options,
   }) {
     return super
@@ -233,7 +233,7 @@ class JsonKeyOutputFunctionsParser<T extends Object?>
 
   @override
   Stream<T> streamFromInputStream(
-    final Stream<LanguageModelResult<ChatMessage>> inputStream, {
+    final Stream<dynamic> inputStream, {
     final BaseLangChainOptions? options,
   }) {
     return super

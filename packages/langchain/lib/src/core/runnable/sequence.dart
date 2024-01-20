@@ -111,7 +111,7 @@ class RunnableSequence<RunInput extends Object?, RunOutput extends Object?>
 
   @override
   Stream<RunOutput> streamFromInputStream(
-    final Stream<RunInput> inputStream, {
+    final Stream<dynamic> inputStream, {
     final BaseLangChainOptions? options,
   }) {
     var nextStepStream = first.streamFromInputStream(inputStream);

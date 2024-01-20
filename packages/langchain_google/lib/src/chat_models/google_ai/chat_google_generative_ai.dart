@@ -194,10 +194,10 @@ class ChatGoogleGenerativeAI
 
   @override
   Stream<ChatResult> streamFromInputStream(
-    final Stream<PromptValue> inputStream, {
+    final Stream<dynamic> inputStream, {
     final ChatGoogleGenerativeAIOptions? options,
   }) {
-    return inputStream.asyncExpand((final input) {
+    return inputStream.cast<PromptValue>().asyncExpand((final input) {
       return stream(input, options: options);
     });
   }

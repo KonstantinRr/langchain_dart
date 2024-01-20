@@ -55,12 +55,13 @@ class _FakeOptionsChatModel
 
   @override
   Stream<ChatResult> streamFromInputStream(
-    final Stream<PromptValue> inputStream, {
+    final Stream<dynamic> inputStream, {
     final _FakeOptionsChatModelOptions? options,
   }) {
     return inputStream.asyncExpand(
       (final input) {
         final prompt = input
+            .cast<PromptValue>()
             .toChatMessages()
             .first
             .contentAsString

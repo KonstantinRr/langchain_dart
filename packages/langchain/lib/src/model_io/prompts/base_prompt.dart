@@ -69,7 +69,7 @@ abstract base class BasePromptTemplate
 
   @override
   Stream<PromptValue> streamFromInputStream(
-    final Stream<InputValues> inputStream, {
+    final Stream<dynamic> inputStream, {
     final BaseLangChainOptions? options,
   }) {
     final userKeys = inputVariables.difference(
@@ -77,6 +77,7 @@ abstract base class BasePromptTemplate
     );
     final userInput = <String, dynamic>{};
     return inputStream
+        .cast<InputValues>()
         .asyncMap((final InputValues inputValues) {
           for (final input in inputValues.entries) {
             final key = input.key;

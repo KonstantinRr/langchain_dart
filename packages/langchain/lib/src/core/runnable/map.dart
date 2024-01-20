@@ -69,7 +69,7 @@ class RunnableMap<RunInput extends Object>
 
   @override
   Stream<Map<String, dynamic>> streamFromInputStream(
-    final Stream<RunInput> inputStream, {
+    final Stream<dynamic> inputStream, {
     final BaseLangChainOptions? options,
   }) {
     return StreamGroup.merge(

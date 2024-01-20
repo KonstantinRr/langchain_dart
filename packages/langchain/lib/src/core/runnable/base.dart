@@ -137,7 +137,7 @@ abstract class Runnable<RunInput extends Object?,
   /// - [options] - the options to use when invoking the [Runnable].
   @protected
   Stream<RunOutput> streamFromInputStream(
-    final Stream<RunInput> inputStream, {
+    final Stream<dynamic> inputStream, {
     final CallOptions? options,
   }) {
     // By default, it just emits the result of calling invoke

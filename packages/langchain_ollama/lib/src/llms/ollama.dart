@@ -201,10 +201,10 @@ class Ollama extends BaseLLM<OllamaOptions> {
 
   @override
   Stream<LLMResult> streamFromInputStream(
-    final Stream<PromptValue> inputStream, {
+    final Stream<dynamic> inputStream, {
     final OllamaOptions? options,
   }) {
-    return inputStream.asyncExpand((final input) {
+    return inputStream.cast<PromptValue>().asyncExpand((final input) {
       return stream(input, options: options);
     });
   }
